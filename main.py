@@ -8,8 +8,8 @@ from education.utils.file_manager import save_exercise_data
 import time
 
 courses = [
-    {'title': 'Comunicação e Linguagem', 'id': 2273329, 'course_name': 'sistemas_operacionais'},
-    {'title': 'Sistemas Operacionais', 'id': 2273383, 'course_name': 'comunicacao_e_linguagem'},
+    {'title': 'Comunicação e Linguagem', 'id': 2273329, 'course_name': 'comunicacao_e_linguagem'},
+    {'title': 'Sistemas Operacionais', 'id': 2273383, 'course_name': 'sistemas_operacionais'},
     # {'title': 'Arquitetura e Organização de Computadores', 'id': 2274882,
     # 'course_name': 'arquitetura_organizacao_de_computadores'},
     # {'title': 'Empreendedorismo', 'id': 2274884, 'course_name': 'empreendedorismo'},
