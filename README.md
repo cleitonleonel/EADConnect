@@ -29,7 +29,7 @@ O objetivo do **EADConnect** é simplificar o acesso e manuseio de dados da plat
 - 🧪 Testes e estrutura modular pronta para extensão
 - 📦 Compactação automática em `.zip` dos materiais gerados
 - 🧠 Organização de código modular e clara (config, auth, file_manager etc.)
-- 🐍 Compatível com Python **3.9+**
+- 🐍 Compatível com Python **3.12+**
 
 ---
 
