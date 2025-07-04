@@ -5,6 +5,7 @@ description = "Uma ponte entre você e a plataforma de EAD do Grupo A Educação
 authors = [
     {name = "cleiton",email = "cleiton.leonel@gmail.com"}
 ]
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
