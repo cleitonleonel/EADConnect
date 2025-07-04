@@ -1,5 +1,6 @@
 from fpdf import FPDF
 from bs4 import BeautifulSoup
+from eadconnect.config import font_path
 import re
 import textwrap
 
@@ -27,19 +28,19 @@ class PDF(FPDF):
         self.add_font(
             "DejaVu",
             "",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            (font_path / "DejaVuSans.ttf").as_posix(),
             uni=True
         )
         self.add_font(
             "DejaVu",
             "B",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            (font_path / "DejaVuSans-Bold.ttf").as_posix(),
             uni=True
         )
         self.add_font(
             "DejaVu",
             "I",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf",
+            (font_path / "DejaVuSans-Oblique.ttf").as_posix(),
             uni=True
         )
         self.set_font("DejaVu", size=12)
@@ -103,7 +104,7 @@ class PDF(FPDF):
             self.ln(2)
 
             for i, opt in enumerate(q["options"]):
-                if opt["isCorrect"]:
+                if opt.get("isCorrect"):
                     letra = chr(65 + i)
                     texto = html_to_text(opt["text"])
                     justificativa = html_to_text(opt["feedback"])

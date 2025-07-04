@@ -57,7 +57,7 @@ python main.py
 
 ```
 EADConnect/
-├── education/
+├── eadconnect/
 │   ├── http/
 │   │   └── navigator.py
 │   ├── utils/
@@ -83,9 +83,9 @@ EADConnect/
 ## 🧪 Exemplos de Uso
 
 ```python
-from education.client import EducationAPI
-from education.utils.auth import authenticate
-from education.utils.file_manager import save_exercise_data
+from eadconnect.client import EducationAPI
+from eadconnect.utils.auth import authenticate
+from eadconnect.utils.file_manager import save_exercise_data
 
 client = EducationAPI("unidade_ensino", "username", "password")
 client.access_token = authenticate(client)

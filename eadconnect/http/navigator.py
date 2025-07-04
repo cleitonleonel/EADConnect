@@ -154,9 +154,8 @@ class Browser(Session):
             )
             if not self.response.ok:
                 logging.error(f"Request failed with status code: {self.response.status_code}")
-                self.response.raise_for_status()
             logging.info(f"Request succeeded with status code: {self.response.status_code}")
             return self.response
         except Exception as e:
             logging.exception(f"An error occurred while making a request: {e}")
-            return None
+            return self.response
