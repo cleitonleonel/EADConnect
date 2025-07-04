@@ -60,6 +60,9 @@ EADConnect/
 ├── eadconnect/
 │   ├── http/
 │   │   └── navigator.py
+│   ├── services/
+│   │   ├── academic_service.py
+│   │   ├── notification_service.py
 │   ├── utils/
 │   │   ├── auth.py
 │   │   ├── file_manager.py

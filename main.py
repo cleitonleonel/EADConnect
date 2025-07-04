@@ -5,7 +5,7 @@ from eadconnect.config import (
 )
 from eadconnect.utils.auth import authenticate
 from eadconnect.utils.file_manager import save_exercise_data
-# from eadconnect.services.notifier import start_monitor
+# from eadconnect.services.notification_service import start_monitor
 
 import asyncio
 import logging
