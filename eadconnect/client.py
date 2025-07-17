@@ -17,6 +17,7 @@ class EducationAPI(Browser, Endpoints):
         self.username = username
         self.password = password
         self.access_token = None
+        self.app_access_token = None
         self.set_headers()
 
     @property
@@ -43,7 +44,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def persist_access_token(self, access_token):
+    def persist_access_token(self, access_token: str):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Authorization': access_token
@@ -64,7 +65,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_messages(self, page=1, items_per_page=15):
+    def get_messages(self, page: int = 1, items_per_page: int = 15):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -85,7 +86,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_notices(self, page=1, items_per_page=15):
+    def get_notices(self, page: int = 1, items_per_page: int = 15):
         """Retrieve the notices for the user."""
         self.headers.update({
             'Referer': f"{self.base_url}/",
@@ -107,7 +108,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def check_me(self, access_token):
+    def check_me(self, access_token: str):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -122,11 +123,11 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_me(self):
+    def get_me(self, access_token: str = None):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
-            'Authorization': self.access_token
+            'Authorization': access_token or self.access_token
         })
         response = self.send_request(
             'GET',
@@ -158,7 +159,13 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_my_courses(self, state="all", period=11903, page=1, items_per_page=20):
+    def get_my_courses(
+            self,
+            state: str = "all",
+            period: int = 11903,
+            page: int = 1,
+            items_per_page: int = 20
+    ):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -183,7 +190,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_contents(self, course_id):
+    def get_contents(self, course_id: int):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -198,7 +205,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_exercises(self, course_id, topic_id):
+    def get_exercises(self, course_id: int, topic_id: int):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -213,7 +220,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_grades(self, course_id):
+    def get_grades(self, course_id: int):
         self.headers.update({
             'Referer': f"{self.base_url}/",
             'Accept': 'application/json',
@@ -244,7 +251,7 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
-    def get_calendar(self, start_date, end_date):
+    def get_calendar(self, start_date: str, end_date: str):
         """Retrieve the academic calendar for a specific course."""
         self.headers.update({
             'Referer': f"{self.base_url}/",
@@ -252,7 +259,7 @@ class EducationAPI(Browser, Endpoints):
             'authorization': self.access_token
         })
         payload = {
-            'appointmentCategory': '1,5',
+            'appointmentCategory': '1,2,5,6',
             'startDate': start_date,
             'endDate': end_date
         }
@@ -265,3 +272,155 @@ class EducationAPI(Browser, Endpoints):
             return response.json()
 
         return response
+
+    def auth_app_launcher(self):
+        """Authenticate the app launcher."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.access_token
+        })
+        params = {
+            'appLauncher': False
+        }
+        payload = {
+            'iesAlias': '107_1',
+            'roleAlias': 'student',
+            'tenantAlias': f'{self.institution.lower()}',
+            'uuid': self.username
+        }
+        response = self.send_request(
+            'POST',
+            f'{self.URL_API}/{self.CLIENT_AUTH}/sso/applications/academic-services/url',
+            params=params,
+            json=payload
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def get_my_info(self):
+        """Retrieve the user profile information."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/v1/academic-services/bff/my-informations'
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def get_debts(
+            self,
+            registration_number: str = None,
+            status: str = 'pending',
+            page: int = 1,
+            items_per_page: int = 10
+    ):
+        """Retrieve the user's debts."""
+        payload = {
+            'perPage': items_per_page,
+            'page': page,
+            'academicRecord': registration_number,
+            'filterYear': '',
+            'filterPeriod': '',
+            'filterType': '',
+            'filterStatusType': status,
+            'checkfitForAgreement': True,
+            'viewSlips': True,
+            'order': 'DESC|ASC|ASC|ASC|ASC',
+            'sortBy': 'warning_agreement|due_date|debt_number|competency_month|competency_year'
+        }
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/v1/service-portal/financial/debts',
+            params=payload
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def get_contract_slip(self, contract_id: int):
+        """Retrieve the slip for a specific debt."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/v1/service-portal/financial/debts/{contract_id}'
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def get_payment_methods(self):
+        """Retrieve the available payment methods."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/v1/service-portal/financial/payment/methods'
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def get_payment_settings(self):
+        """Retrieve the payment settings for the user."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/{self.PLATFORM_V1}/service-portal/financial/settings'
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+    def create_payment(self, registration_number: str, payment_data: dict):
+        """Create a payment for the user register."""
+        payload = payment_data
+        params = {
+            'academicRecord': registration_number,
+            'isAgreement': False
+        }
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.app_access_token
+        })
+        response = self.send_request(
+            'POST',
+            f'{self.URL_API}/v1/service-portal/financial/payment/charges/pix',
+            params=params,
+            json=payload
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
+
