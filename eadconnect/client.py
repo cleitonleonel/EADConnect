@@ -108,6 +108,29 @@ class EducationAPI(Browser, Endpoints):
 
         return response
 
+    def get_notices_board(self, course_id: int = 2326262, page: int = 1, items_per_page: int = 5):
+        """Retrieve the notice board for the user."""
+        self.headers.update({
+            'Referer': f"{self.base_url}/",
+            'Accept': 'application/json',
+            'Authorization': self.access_token
+        })
+        payload = {
+            'isHighlight': True,
+            'perPage': items_per_page,
+            'page': page,
+            'orderBy': 'sequence:asc'
+        }
+        response = self.send_request(
+            'GET',
+            f'{self.URL_API}/{self.PLATFORM_V1}/academic/courses/{course_id}/notices-board',
+            params=payload
+        )
+        if response.ok:
+            return response.json()
+
+        return response
+
     def check_me(self, access_token: str):
         self.headers.update({
             'Referer': f"{self.base_url}/",

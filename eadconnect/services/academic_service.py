@@ -96,10 +96,10 @@ class AcademicService:
         ]
 
     def get_calendar(self, start_date: str = None, end_date: str = None):
-        """Fetch the calendar events for the user."""
+        """Retrieve the calendar for the platform."""
         calendar = self.client.get_calendar(start_date, end_date)
         if not calendar:
-            logging.warning("Nenhum evento encontrado no calendário.")
+            logging.warning("No events found in the calendar.")
             return
 
         return calendar

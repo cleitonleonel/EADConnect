@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from eadconnect.config import CREDENTIALS
 
@@ -26,7 +27,7 @@ def is_token_valid(client, token: str) -> bool:
         return False
 
 
-def authenticate(client, attempts: int = 5, auto_save: bool = True) -> str:
+def authenticate(client, attempts: int = 5, auto_save: bool = True) -> str | None:
     """Autentica com a API usando o access_token armazenado ou refaz login se necessário."""
     for attempt in range(attempts):
         access_token = load_access_token()
@@ -35,6 +36,11 @@ def authenticate(client, attempts: int = 5, auto_save: bool = True) -> str:
 
         if not access_token:
             login_response = client.login()
+
+            if not isinstance(login_response, dict):
+                logging.error("Erro ao fazer login: resposta inválida.")
+                return None
+
             access_token = client.persist_access_token(
                 login_response.get('accessToken')
             ).get('accessToken')
