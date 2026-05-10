@@ -1,39 +1,41 @@
-#  📚🔗 **EADConnect**  
-### Uma ponte entre você e a plataforma de EAD do Grupo A Educação!
+<div align="center">
+  <h1> 📚🔗 EADConnect </h1>
+  <h3> Uma ponte entre você e a plataforma de EAD do Grupo A Educação! </h3>
 
-![EADConnect](src/img/EADConnect.png)
+  ![EADConnect](src/img/EADConnect.png)
 
-<a target="_blank">
-    <img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-green" alt="python" width="250">
-</a>
+  <img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-blue?logo=python&logoColor=white" alt="python">
+  <img src="https://img.shields.io/badge/Poetry-Project-60A5FA?logo=poetry&logoColor=white" alt="poetry">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="license">
+</div>
 
 ---
 
 ### ✨ **Descrição**
 
-O **EADConnect** é uma interface moderna e automatizada desenvolvida em Python que interage com a API da plataforma de educação a distância do Grupo A. Ele permite que você **baixe conteúdos, colete exercícios, salve dados em formatos estruturados (JSON, PDF)** e muito mais — tudo com poucos comandos.
+O **EADConnect** é uma biblioteca e interface automatizada desenvolvida em Python para interagir com a API da plataforma de educação a distância do Grupo A (utilizada por instituições como FAESA, entre outras). Ele permite automatizar a coleta de conteúdos, monitorar notas em tempo real e gerenciar informações acadêmicas e financeiras de forma programática.
 
-💡 Ideal para estudantes, professores, desenvolvedores de automações educacionais e pesquisadores que desejam **facilitar o acesso e organização de conteúdos da plataforma**.
+💡 Ideal para estudantes que desejam centralizar seus estudos, desenvolvedores que buscam criar ferramentas educacionais ou para quem simplesmente quer organizar seus materiais offline.
 
 ---
 
 ### 🚀 **Recursos**
 
-O objetivo do **EADConnect** é simplificar o acesso e manuseio de dados da plataforma EAD, permitindo:
+O **EADConnect** oferece um conjunto robusto de ferramentas para facilitar sua vida acadêmica:
 
-- 🔐 Autenticação e gerenciamento de sessões com a API
-- 🧠 Cliente HTTP customizado com headers dinâmicos
-- 📥 Coleta automatizada de exercícios de diferentes disciplinas
-- 📄 Exportação em PDF e JSON
-- 🗂️ Organização automática de arquivos
-- 🧪 Testes e estrutura modular pronta para extensão
-- 📦 Compactação automática em `.zip` dos materiais gerados
-- 🧠 Organização de código modular e clara (config, auth, file_manager etc.)
-- 🐍 Compatível com Python **3.12+**
+- 🔐 **Autenticação Segura**: Gerenciamento completo de sessões e tokens (incluindo tokens de aplicação para serviços extras).
+- 📥 **Extração de Conteúdo**: Baixe materiais de tópicos, exercícios e gere PDFs organizados automaticamente.
+- 📊 **Monitoramento de Notas**: Script de monitoramento que envia notificações via **Telegram** assim que uma nova nota é postada.
+- 💰 **Gestão Financeira**: Consulte débitos pendentes e gere dados para pagamento via PIX diretamente pela API.
+- 📅 **Calendário & Comunicação**: Acesse eventos do calendário acadêmico, quadros de avisos e mensagens da caixa de entrada.
+- 🏗️ **Arquitetura Modular**: Estrutura organizada em comandos (`commands`), serviços (`services`) e utilitários (`utils`).
+- 🧪 **Extensível**: Baseado em um cliente HTTP customizado (`Browser`) pronto para novas integrações.
 
 ---
 
-### 📦 **Instalação com Poetry**
+### 📦 **Instalação**
+
+O projeto utiliza o **Poetry** para gerenciamento de dependências.
 
 ```bash
 # Clone o repositório
@@ -42,12 +44,11 @@ cd EADConnect
 
 # Instale as dependências
 poetry install
-poetry self add poetry-plugin-shell
 
 # Ative o ambiente virtual
 poetry shell
 
-# Rode o app
+# Execute o script principal
 python main.py
 ```
 
@@ -55,64 +56,82 @@ python main.py
 
 ### 🧭 **Estrutura do Projeto**
 
-```
+```text
 EADConnect/
-├── eadconnect/
-│   ├── http/
-│   │   └── navigator.py
-│   ├── services/
-│   │   ├── academic_service.py
-│   │   ├── notification_service.py
-│   ├── utils/
-│   │   ├── auth.py
-│   │   ├── file_manager.py
-│   │   ├── pdf.py
-│   ├── client.py
-│   ├── config.py
-│   └── endpoints.py
-├── src/
-│   └── img/
-│       └── logo.png
-├── .gitignore
-├── main.py
-├── LICENSE
-├── pyproject.toml
-├── poetry.lock
+├── eadconnect/              # Pacote principal
+│   ├── commands/            # Comandos de alto nível (Conteúdo, Notas, Financeiro, etc.)
+│   ├── http/                # Cliente base e navegação
+│   ├── services/            # Serviços (Monitoramento, Notificações)
+│   ├── utils/               # Utilitários (PDF, Auth, File Manager)
+│   ├── client.py            # Classe EducationAPI principal
+│   ├── config.py            # Gerenciamento de configurações (TOML)
+│   └── endpoints.py         # Mapeamento de URLs da API
+├── src/                     # Assets e arquivos gerados
+│   └── img/                 # Logos e banners
+├── tests/                   # Suíte de testes
+├── main.py                  # Entry point de demonstração
+├── pyproject.toml           # Configurações do Poetry
 └── README.md
 ```
 
 ---
 
-## 🧪 Exemplos de Uso
+### 🧪 **Exemplo de Uso**
+
+Abaixo, um exemplo simplificado de como utilizar a `EducationAPI` para buscar notas:
 
 ```python
+import asyncio
 from eadconnect.client import EducationAPI
 from eadconnect.utils.auth import authenticate
-from eadconnect.utils.file_manager import save_exercise_data
 
-client = EducationAPI("unidade_ensino", "username", "password")
-client.access_token = authenticate(client)
+async def main():
+    # Inicializa o cliente
+    client = EducationAPI(institution="faesa", username="seu_usuario", password="sua_senha")
+    
+    # Autentica e obtém o token de acesso
+    client.access_token = authenticate(client)
+    
+    # Lista cursos ativos e suas notas
+    my_courses = client.get_my_courses()
+    for course in my_courses.get('courses', []):
+        if course.get('status') == 'isActual':
+            grades = client.get_grades(course['id'])
+            print(f"Disciplina: {course['name']} | Nota: {grades.get('finalGrade', {}).get('value')}")
 
-exercises = client.get_exercises(course_id="123", topic_id="231")
-save_exercise_data(exercises, "course_name", "231")
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ---
 
-## 🤝 Contribuições
+### 🛠️ **Tecnologias Principais**
 
-Sinta-se livre para abrir issues, enviar pull requests ou sugerir melhorias.  
-Toda ajuda é bem-vinda! 💡
+- **[Requests](https://requests.readthedocs.io/)**: Comunicação HTTP robusta.
+- **[BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/)**: Parsing de conteúdos HTML.
+- **[Telethon](https://docs.telethon.dev/)**: Integração com a API do Telegram para notificações.
+- **[fpdf2](https://py-pdf.github.io/fpdf2/)**: Geração de documentos PDF.
+- **[Schedule](https://schedule.readthedocs.io/)**: Agendamento de tarefas periódicas.
 
 ---
 
-## 📝 Licença
+### 🤝 **Contribuições**
 
-Este projeto é licenciado sob a **MIT License**. Consulte o arquivo `LICENSE` para mais detalhes.
+Contribuições são o que fazem a comunidade open source um lugar incrível! Sinta-se à vontade para:
+1. Dar um **Fork** no projeto.
+2. Criar uma **Feature Branch** (`git checkout -b feature/AmazingFeature`).
+3. Dar um **Commit** em suas mudanças (`git commit -m 'Add some AmazingFeature'`).
+4. Dar um **Push** na Branch (`git push origin feature/AmazingFeature`).
+5. Abrir um **Pull Request**.
 
-## 🧑‍💻 Desenvolvedor
+---
+
+### 📝 **Licença**
+
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+### 🧑‍💻 **Desenvolvedor**
 
 Feito com 💙 por [Cleiton Leonel Creton](https://www.linkedin.com/in/cleiton-leonel-creton-331138167/)  
-📫 cleiton.leonel@gmail.com  
+📫 [cleiton.leonel@gmail.com](mailto:cleiton.leonel@gmail.com)  
 🐙 [GitHub](https://github.com/cleitonleonel) | 📱 [WhatsApp](https://wa.me/5527995772291?text=Ol%C3%A1%2C+vim+pelo+seu+projeto+EADConnect+e+gostaria+de+falar+com+voc%C3%AA!)
-

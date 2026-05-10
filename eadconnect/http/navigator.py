@@ -126,13 +126,12 @@ class Browser(Session):
         )
 
     def set_headers(self, headers=None):
-        self.headers = {
+        self.headers.update({
             "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0",
             "X-User-Timezone": "America/Sao_Paulo"
-        }
+        })
         if headers:
-            for key, value in headers.items():
-                self.headers[key] = value
+            self.headers.update(headers)
 
     def get_headers(self):
         return self.headers
@@ -143,13 +142,18 @@ class Browser(Session):
             "html.parser"
         )
 
-    def send_request(self, method, url, **kwargs):
+    def send_request(self, method, url, headers=None, **kwargs):
         logging.info(f"Sending {method} request to: {url}")
+        # Mescla os cabeçalhos da sessão com os cabeçalhos específicos desta requisição
+        request_headers = self.headers.copy()
+        if headers:
+            request_headers.update(headers)
+            
         try:
             self.response = self.request(
                 method,
                 url,
-                headers=self.headers,
+                headers=request_headers,
                 **kwargs
             )
             if not self.response.ok:
