@@ -1,7 +1,6 @@
 import os
 import json
 import time
-import schedule
 import asyncio
 import logging
 from typing import List, Dict, Any, Optional
@@ -164,10 +163,13 @@ class GradeMonitor:
     async def _verificar_e_notificar(self) -> None:
         """
         Lógica central de comparação: busca notas da API, compara com cache e notifica mudanças.
-        """
-        logger.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Iniciando verificação de notas...")
 
-        notas_atuais_lista = self._buscar_notas_api()
+        O cache é atualizado por disciplina imediatamente após cada notificação bem-sucedida,
+        evitando re-notificações em caso de falha parcial de I/O ao final do ciclo.
+        """
+        logger.info("Iniciando verificação de notas...")
+
+        notas_atuais_lista = await asyncio.to_thread(self._buscar_notas_api)
         if notas_atuais_lista is None:
             logger.warning("Verificação abortada devido a erro na API.")
             return
@@ -176,7 +178,6 @@ class GradeMonitor:
         notas_cache = self._carregar_cache()
 
         houve_mudanca = False
-        tasks_notificacao = []
 
         for disciplina, nota_atual in notas_atuais_dict.items():
             nota_cache = notas_cache.get(disciplina)
@@ -184,40 +185,35 @@ class GradeMonitor:
             # Notifica apenas se houver mudança real de valor
             if nota_cache != nota_atual:
                 logger.info(f"🔄 Mudança em '{disciplina}': '{nota_cache}' -> '{nota_atual}'")
-                tasks_notificacao.append(self._enviar_notificacao(disciplina, nota_cache, nota_atual))
+                await self._enviar_notificacao(disciplina, nota_cache, nota_atual)
+
+                # Atualiza o cache desta disciplina imediatamente após a notificação,
+                # evitando duplicação caso o processo seja interrompido no meio do ciclo.
+                notas_cache[disciplina] = nota_atual
+                self._salvar_cache(notas_cache)
                 houve_mudanca = True
 
-        if tasks_notificacao:
-            await asyncio.gather(*tasks_notificacao)
-
-        if houve_mudanca:
-            logger.info("💾 Atualizando cache...")
-            self._salvar_cache(notas_atuais_dict)
-        else:
+        if not houve_mudanca:
             logger.info("👍 Sem alterações.")
-            # Opcional: Feedback silencioso ou remoção de msg de status se necessário
 
     async def run(self) -> None:
         """
-        Inicia a conexão com o Telegram e o loop de monitoramento agendado.
+        Inicia a conexão com o Telegram e o loop de monitoramento.
+
+        Usa asyncio.sleep em vez de `schedule` para garantir execução sequencial:
+        cada ciclo de verificação sempre termina antes do próximo iniciar,
+        eliminando race conditions e o acúmulo de jobs duplicados no scheduler global.
         """
         try:
             await self.client.start(bot_token=self.bot_token)
             logger.info("✅ Monitor iniciado com sucesso.")
 
-            # Execução imediata
-            await self._verificar_e_notificar()
-
-            # Agendamento periódico
-            schedule.every(self.check_interval).minutes.do(
-                lambda: asyncio.create_task(self._verificar_e_notificar())
-            )
-
-            logger.info(f"🗓️ Verificações agendadas a cada {self.check_interval} minutos.")
-
             while True:
-                schedule.run_pending()
-                await asyncio.sleep(1)
+                await self._verificar_e_notificar()
+                logger.info(
+                    f"⏳ Aguardando {self.check_interval} minuto(s) para próxima verificação..."
+                )
+                await asyncio.sleep(self.check_interval * 60)
 
         except KeyboardInterrupt:
             logger.info("\n🛑 Monitor parado pelo usuário.")

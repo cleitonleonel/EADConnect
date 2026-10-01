@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     # Execução do script principal (modifique para a função desejada)
     try:
-        asyncio.run(extrair_conteudo(client, CURSOS, download_topics=True))
+        asyncio.run(extrair_conteudo(client, CURSOS, download_type="EXERCISES"))
         # asyncio.run(verificar_notas(client))
         # asyncio.run(exibir_financeiro(client))
         # asyncio.run(exibir_notificacoes(client))
